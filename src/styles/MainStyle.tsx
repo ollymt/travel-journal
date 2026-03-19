@@ -189,6 +189,7 @@ export const getStyles = (theme) =>
       flexDirection: "column",
       backgroundColor: theme.background,
       borderColor: theme.primary,
+      color: theme.text,
       borderWidth: 2,
       width: "100%",
       minHeight: 40,
@@ -199,7 +200,7 @@ export const getStyles = (theme) =>
       alignContent: "flex-start",
       justifyContent: "flex-start",
     },
-    floatingBttn: {
+    addBttn: {
       position: "absolute",
       bottom: 20,
       right: 20,
@@ -215,7 +216,30 @@ export const getStyles = (theme) =>
       shadowRadius: 4,
       elevation: 5,
     },
-    floatingBttnText: {
+    addBttnText: {
+      color: theme.primaryText,
+      fontSize: 24,
+      fontWeight: "bold",
+    },
+
+    themeBttn: {
+      position: "absolute",
+      bottom: 20,
+      left: 20,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: theme.primary,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+
+    themeBttnText: {
       color: theme.primaryText,
       fontSize: 24,
       fontWeight: "bold",
@@ -393,12 +417,14 @@ export const getStyles = (theme) =>
     },
     noImageContainer: {
       width: "100%",
-      height: "auto",
+      height: 400,
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: theme.mute,
     },
     noImageText: {
       fontSize: 16,
+      color: theme.muteText,
     },
 
     // Detail Action Buttons
@@ -416,10 +442,22 @@ export const getStyles = (theme) =>
       marginHorizontal: 5,
     },
     editButton: {
-      backgroundColor: theme.primary,
+      backgroundColor: theme.background,
+      borderWidth: 2,
+      borderColor: theme.primary,
+      flex: 3,
+    },
+    editButtonText: {
+      color: theme.primary,
     },
     deleteButton: {
-      backgroundColor: theme.accent,
+      backgroundColor: theme.background,
+      borderWidth: 2,
+      borderColor: theme.error,
+    },
+    deleteButtonText: {
+      color: theme.error,
+      fontWeight: 500,
     },
     detailButtonText: {
       color: theme.primaryText,
@@ -647,10 +685,49 @@ export const getStyles = (theme) =>
 
     entryDetailContent: {
       padding: 10,
+      gap: 10,
     },
 
     entryDetailTitle: {
       fontSize: 24,
       fontWeight: 500,
-    }
+      color: theme.text,
+    },
+
+    entryDetailLocation: {
+      color: theme.text,
+    },
+
+    entryDetailNotes: {
+      color: theme.text,
+    },
+
+    entryDetailRatingCont: {
+      flexDirection: "row",
+      borderWidth: 2,
+    },
+
+    buttonRed: {
+      backgroundColor: theme.error,
+    },
+
+    errorText: {
+      color: theme.textSecondary,
+    },
+
+    entryDetailTags: {
+      flexDirection: "row",
+      gap: 4,
+    },
+
+    entryDetailTag: {
+      backgroundColor: theme.mute,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 10,
+    },
+
+    entryDetailTagText: {
+      color: theme.primaryText,
+    },
   });

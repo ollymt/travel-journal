@@ -20,6 +20,9 @@ export const ThemeProvider = ({ children }) => {
     primaryText: isDarkMode ? "#4F3673" : "#DAC9F2",
     inactive: isDarkMode ? "#6F618C" : "#6F618C",
     accent: isDarkMode ? "#AE7CB7" : "#8451A6", // Your brand color
+    mute: isDarkMode ? "#B1A0C8" : "#CDA9FF",
+    muteText: isDarkMode ? "#392E48" : "#392E48",
+    error: isDarkMode ? "#F29B9B" : "#D93636",
     isDarkMode,
   };
 

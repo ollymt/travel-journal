@@ -1,7 +1,8 @@
+// contexts/TravelContext.js
 import { useEffect, useState, useContext, createContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import uuid from "react-native-uuid";
-import * as ImagePicker from "expo-image-picker";
+import { useNotifications } from "./NotificationContext"; // Add this
 
 const TravelContext = createContext();
 
@@ -9,6 +10,9 @@ export const TravelProvider = ({ children }) => {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Get notification functions
+  const { notifyNewEntry, notifyUpdatedEntry } = useNotifications();
 
   useEffect(() => {
     loadEntries();
@@ -52,6 +56,10 @@ export const TravelProvider = ({ children }) => {
       const updatedEntries = [newEntry, ...entries];
       setEntries(updatedEntries);
       await saveEntries(updatedEntries);
+
+      // Send notification for new entry
+      await notifyNewEntry(newEntry);
+
       return newEntry;
     } catch (e) {
       setError("Failed to add entry");
@@ -74,6 +82,15 @@ export const TravelProvider = ({ children }) => {
 
       setEntries(updatedEntries);
       await saveEntries(updatedEntries);
+
+      // Find the updated entry to get its data
+      const updatedEntry = updatedEntries.find((e) => e.id === id);
+
+      // Send notification for updated entry
+      if (updatedEntry) {
+        await notifyUpdatedEntry(updatedEntry);
+      }
+
       return true;
     } catch (e) {
       setError("Failed to update entry");
@@ -99,68 +116,6 @@ export const TravelProvider = ({ children }) => {
     return entries.find((entry) => entry.id === id);
   };
 
-  // Expo-compatible image picker
-  const pickImage = async () => {
-    try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permission needed to access photos");
-        return null;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        quality: 0.8,
-        base64: false,
-      });
-
-      if (!result.canceled) {
-        return {
-          uri: result.assets[0].uri,
-          fileName: result.assets[0].fileName || `image_${Date.now()}.jpg`,
-          fileSize: result.assets[0].fileSize,
-          type: "image/jpeg",
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error("Error picking image:", error);
-      return null;
-    }
-  };
-
-  // Expo-compatible camera
-  const takePhoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permission needed to use camera");
-        return null;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        quality: 0.8,
-        base64: false,
-      });
-
-      if (!result.canceled) {
-        return {
-          uri: result.assets[0].uri,
-          fileName: result.assets[0].fileName || `photo_${Date.now()}.jpg`,
-          fileSize: result.assets[0].fileSize,
-          type: "image/jpeg",
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error("Error taking photo:", error);
-      return null;
-    }
-  };
-
   return (
     <TravelContext.Provider
       value={{
@@ -171,8 +126,6 @@ export const TravelProvider = ({ children }) => {
         updateEntry,
         deleteEntry,
         getEntry,
-        pickImage,
-        takePhoto,
         refreshEntries: loadEntries,
       }}
     >

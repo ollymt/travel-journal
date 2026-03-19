@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   Image,
   ScrollView,
-  TouchableOpacity,
+  Pressable,
   Alert,
   Dimensions,
 } from "react-native";
@@ -22,6 +22,25 @@ export default function EntryDetailScreen({ navigation, route }) {
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const entry = getEntry(entryId);
+
+  // Format date for header
+  const formatHeaderDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  // Set header title when entry loads
+  useEffect(() => {
+    if (entry) {
+      navigation.setOptions({
+        title: formatHeaderDate(entry.date),
+      });
+    }
+  }, [entry, navigation]); // Re-run if entry changes
 
   if (!entry) {
     return (
@@ -42,8 +61,8 @@ export default function EntryDetailScreen({ navigation, route }) {
 
   const handleDelete = () => {
     Alert.alert(
-      "Delete Memory",
-      "Are you sure you want to delete this memory?",
+      "Delete Entry",
+      "Are you sure you want to delete this entry? This action cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -100,20 +119,20 @@ export default function EntryDetailScreen({ navigation, route }) {
           {entry.photos.length > 1 && (
             <>
               {currentImageIndex > 0 && (
-                <TouchableOpacity
+                <Pressable
                   style={[styles.imageNavButton, styles.imageNavLeft]}
                   onPress={prevImage}
                 >
                   <Text style={styles.imageNavText}>←</Text>
-                </TouchableOpacity>
+                </Pressable>
               )}
               {currentImageIndex < entry.photos.length - 1 && (
-                <TouchableOpacity
+                <Pressable
                   style={[styles.imageNavButton, styles.imageNavRight]}
                   onPress={nextImage}
                 >
                   <Text style={styles.imageNavText}>→</Text>
-                </TouchableOpacity>
+                </Pressable>
               )}
             </>
           )}
@@ -129,9 +148,9 @@ export default function EntryDetailScreen({ navigation, route }) {
         </View>
       ) : (
         <View
-          style={[styles.noImageContainer, { backgroundColor: theme.card }]}
+          style={[styles.noImageContainer]}
         >
-          <Text style={[styles.noImageText, { color: theme.textSecondary }]}>
+          <Text style={[styles.noImageText]}>
             No photo available
           </Text>
         </View>
@@ -139,34 +158,8 @@ export default function EntryDetailScreen({ navigation, route }) {
 
       {/* Entry Details */}
       <View style={styles.entryDetailContent}>
-        <Text style={styles.entryDetailTitle}>{entry.title}</Text>
-        <Text style={styles.entryDetailLocation}>📍 {entry.location}</Text>
-        <Text style={styles.entryDetailDate}>📅 {formatDate(entry.date)}</Text>
-
-        {entry.rating > 0 && (
-          <View style={styles.entryDetailRating}>
-            <Text style={styles.entryDetailRatingText}>Rating: </Text>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Text
-                key={star}
-                style={[styles.star, star <= entry.rating && styles.starFilled]}
-              >
-                ★
-              </Text>
-            ))}
-          </View>
-        )}
-
-        {entry.notes ? (
-          <>
-            <Text style={styles.entryDetailSectionTitle}>Notes</Text>
-            <Text style={styles.entryDetailNotes}>{entry.notes}</Text>
-          </>
-        ) : null}
-
         {entry.tags && entry.tags.length > 0 ? (
           <>
-            <Text style={styles.entryDetailSectionTitle}>Tags</Text>
             <View style={styles.entryDetailTags}>
               {entry.tags.map((tag, index) => (
                 <View key={index} style={styles.entryDetailTag}>
@@ -176,22 +169,53 @@ export default function EntryDetailScreen({ navigation, route }) {
             </View>
           </>
         ) : null}
+        <Text style={styles.entryDetailTitle}>{entry.title}</Text>
+        <Text style={styles.entryDetailLocation}>📍 {entry.location}</Text>
+
+        {entry.rating > 0 && (
+          <View style={styles.entryDetailRating}>
+            <View style={styles.ratingContainer}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Text
+                  key={star}
+                  style={[
+                    styles.star,
+                    styles.starPressable,
+                    star <= entry.rating && styles.starFilled,
+                  ]}
+                >
+                  ★
+                </Text>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {entry.notes ? (
+          <>
+            <Text style={styles.entryDetailNotes}>{entry.notes}</Text>
+          </>
+        ) : null}
 
         {/* Action Buttons */}
         <View style={styles.detailActionButtons}>
-          <TouchableOpacity
-            style={[styles.detailButton, styles.editButton]}
-            onPress={handleEdit}
-          >
-            <Text style={styles.detailButtonText}>Edit Memory</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
+          <Pressable
             style={[styles.detailButton, styles.deleteButton]}
             onPress={handleDelete}
           >
-            <Text style={styles.detailButtonText}>Delete</Text>
-          </TouchableOpacity>
+            <Text style={[styles.detailButtonText, styles.deleteButtonText]}>
+              Delete
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.detailButton, styles.editButton]}
+            onPress={handleEdit}
+          >
+            <Text style={[styles.detailButtonText, styles.editButtonText]}>
+              Edit Entry
+            </Text>
+          </Pressable>
         </View>
       </View>
     </ScrollView>

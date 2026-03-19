@@ -27,8 +27,6 @@ const AppNavigator = () => {
             backgroundColor: theme.background,
             elevation: 0,
             shadowOpacity: 0,
-            borderBottomWidth: 1,
-            borderBottomColor: theme.border || "#eee",
           },
           headerTitleStyle: {
             color: theme.text,
@@ -44,7 +42,7 @@ const AppNavigator = () => {
         <Stack.Screen
           name="Entries"
           component={EntriesPage}
-          options={{ title: "Travel Journal" }}
+          options={{ title: "Volante" }}
         />
         <Stack.Screen
           name="AddEntry"

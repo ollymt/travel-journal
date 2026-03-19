@@ -1,5 +1,5 @@
 // screens/AddEntryScreen/AddEntryScreen.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
   Linking,
 } from "react-native";
+import { usePreventRemove } from "@react-navigation/native";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../styles/MainStyle";
 import { useTravel } from "../../contexts/TravelContext";
@@ -21,6 +22,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import uuid from "react-native-uuid";
+import { playSound } from "../../services/SoundService";
 
 export default function AddEntryScreen({ navigation, route }) {
   const { theme } = useTheme();
@@ -31,6 +33,9 @@ export default function AddEntryScreen({ navigation, route }) {
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isDirty, setIsDirty] = useState(false); // Track if form has been modified
+
+  const isSaving = useRef(false);
 
   // Parse date string to Date object
   const parseDate = (dateString) => {
@@ -51,19 +56,82 @@ export default function AddEntryScreen({ navigation, route }) {
 
   const [errors, setErrors] = useState({});
 
-  // Set header title
+  // Check if form has been modified
+  const checkIfDirty = (newData) => {
+    if (entryId) {
+      // For edit mode, compare with original
+      const original = getEntry(entryId);
+      if (!original) return true;
+
+      return (
+        newData.title !== original.title ||
+        newData.location !== original.location ||
+        newData.date !== original.date ||
+        newData.notes !== original.notes ||
+        newData.rating !== original.rating ||
+        JSON.stringify(newData.photos) !== JSON.stringify(original.photos) ||
+        JSON.stringify(newData.tags) !== JSON.stringify(original.tags)
+      );
+    } else {
+      // For new entry, check if any field is filled
+      return (
+        newData.title.trim() !== "" ||
+        newData.location.trim() !== "" ||
+        newData.notes.trim() !== "" ||
+        newData.rating !== 0 ||
+        newData.photos.length > 0 ||
+        newData.tags.length > 0
+      );
+    }
+  };
+
+  // Update form data and check if dirty
+  const updateFormData = (newData) => {
+    setFormData(newData);
+    setIsDirty(checkIfDirty(newData));
+  };
+
+  // Update usePreventRemove to check isSaving
+  usePreventRemove(isDirty && !isSaving.current, ({ data }) => {
+    Alert.alert(
+      "Discard Changes?",
+      "You have unsaved changes. Are you sure you want to discard them?",
+      [
+        { text: "Stay", style: "cancel", onPress: () => {} },
+        {
+          text: "Discard",
+          style: "destructive",
+          onPress: () => navigation.dispatch(data.action),
+        },
+      ],
+    );
+  });
+
+  // Set header title and add close button
   useEffect(() => {
     navigation.setOptions({
       title: entryId ? "Edit Entry" : "New Entry",
+      headerLeft: () => (
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={{ marginLeft: 0, padding: 8 }}
+        >
+          <Text
+            style={{ color: theme.primary, fontSize: 20, fontWeight: "600" }}
+          >
+            ←
+          </Text>
+        </Pressable>
+      ),
     });
-  }, [entryId, navigation]);
+  }, [navigation, entryId, theme, isDirty]);
 
   // Load existing entry if editing
   useEffect(() => {
     if (entryId) {
       const existingEntry = getEntry(entryId);
       if (existingEntry) {
-        setFormData({
+        const loadedData = {
           title: existingEntry.title || "",
           location: existingEntry.location || "",
           date: existingEntry.date || new Date().toISOString().split("T")[0],
@@ -72,7 +140,9 @@ export default function AddEntryScreen({ navigation, route }) {
           photos: existingEntry.photos || [],
           tags: existingEntry.tags || [],
           coordinates: existingEntry.coordinates || null,
-        });
+        };
+        setFormData(loadedData);
+        setIsDirty(false); // Start with clean state for edit
       }
     }
   }, [entryId]);
@@ -114,6 +184,8 @@ export default function AddEntryScreen({ navigation, route }) {
       return;
     }
 
+    // Set isSaving BEFORE any async operations
+    isSaving.current = true;
     setLoading(true);
 
     let success;
@@ -126,19 +198,18 @@ export default function AddEntryScreen({ navigation, route }) {
     setLoading(false);
 
     if (success) {
-      Alert.alert(
-        "Success",
-        entryId ? "Entry updated successfully!" : "Entry added successfully!",
-        [{ text: "OK", onPress: () => navigation.goBack() }],
-      );
+      // Navigate back immediately without confirmation
+      navigation.goBack();
     } else {
+      // If save failed, reset isSaving so prevent remove works again
+      isSaving.current = false;
       Alert.alert("Error", "Failed to save entry");
     }
   };
 
   // Handle date change
   const onDateChange = (event, selectedDate) => {
-    setShowDatePicker(Platform.OS === "ios"); // Keep open on iOS, close on Android
+    setShowDatePicker(Platform.OS === "ios");
 
     if (selectedDate) {
       const year = selectedDate.getFullYear();
@@ -146,10 +217,7 @@ export default function AddEntryScreen({ navigation, route }) {
       const day = String(selectedDate.getDate()).padStart(2, "0");
       const dateString = `${year}-${month}-${day}`;
 
-      setFormData((prev) => ({
-        ...prev,
-        date: dateString,
-      }));
+      updateFormData({ ...formData, date: dateString });
     }
   };
 
@@ -206,14 +274,14 @@ export default function AddEntryScreen({ navigation, route }) {
         locationString = `${location.coords.latitude.toFixed(4)}, ${location.coords.longitude.toFixed(4)}`;
       }
 
-      setFormData((prev) => ({
-        ...prev,
+      updateFormData({
+        ...formData,
         location: locationString,
         coordinates: {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         },
-      }));
+      });
 
       if (errors.location) {
         setErrors({ ...errors, location: null });
@@ -247,10 +315,10 @@ export default function AddEntryScreen({ navigation, route }) {
           type: "image/jpeg",
         }));
 
-        setFormData((prev) => ({
-          ...prev,
-          photos: [...prev.photos, ...newPhotos],
-        }));
+        updateFormData({
+          ...formData,
+          photos: [...formData.photos, ...newPhotos],
+        });
       }
     } catch (error) {
       Alert.alert("Error", "Failed to pick image");
@@ -274,10 +342,10 @@ export default function AddEntryScreen({ navigation, route }) {
           type: "image/jpeg",
         };
 
-        setFormData((prev) => ({
-          ...prev,
-          photos: [...prev.photos, newPhoto],
-        }));
+        updateFormData({
+          ...formData,
+          photos: [...formData.photos, newPhoto],
+        });
       }
     } catch (error) {
       Alert.alert("Error", "Failed to take photo");
@@ -286,10 +354,10 @@ export default function AddEntryScreen({ navigation, route }) {
   };
 
   const removeImage = (imageId) => {
-    setFormData((prev) => ({
-      ...prev,
-      photos: prev.photos.filter((photo) => photo.id !== imageId),
-    }));
+    updateFormData({
+      ...formData,
+      photos: formData.photos.filter((photo) => photo.id !== imageId),
+    });
   };
 
   const renderImage = ({ item }) => (
@@ -311,10 +379,10 @@ export default function AddEntryScreen({ navigation, route }) {
         text: "Add",
         onPress: (tag) => {
           if (tag && tag.trim()) {
-            setFormData((prev) => ({
-              ...prev,
-              tags: [...prev.tags, tag.trim().toLowerCase()],
-            }));
+            updateFormData({
+              ...formData,
+              tags: [...formData.tags, tag.trim().toLowerCase()],
+            });
           }
         },
       },
@@ -322,24 +390,22 @@ export default function AddEntryScreen({ navigation, route }) {
   };
 
   const removeTag = (tagToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }));
+    updateFormData({
+      ...formData,
+      tags: formData.tags.filter((tag) => tag !== tagToRemove),
+    });
   };
 
   return (
     <KeyboardAvoidingView
       style={[styles.addEntryContainer, { backgroundColor: theme.background }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      keyboardVerticalOffset={100}
     >
       <ScrollView
         style={styles.addEntryContainer}
         contentContainerStyle={styles.addEntryForm}
-        showsVerticalScrollIndicator={true}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
       >
         {/* Image Gallery */}
         <Text style={styles.inputLabel}>Photos ({formData.photos.length})</Text>
@@ -382,12 +448,13 @@ export default function AddEntryScreen({ navigation, route }) {
             style={[styles.input, errors.title && styles.inputError]}
             value={formData.title}
             onChangeText={(text) => {
-              setFormData({ ...formData, title: text });
+              updateFormData({ ...formData, title: text });
               if (errors.title) setErrors({ ...errors, title: null });
             }}
             placeholder="Enter a title"
             placeholderTextColor={theme.textSecondary}
             maxLength={100}
+            keyboardAppearance={theme.isDarkMode ? "dark" : "light"} // ← Add this
           />
           {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
         </View>
@@ -407,13 +474,14 @@ export default function AddEntryScreen({ navigation, route }) {
               ]}
               value={formData.location}
               onChangeText={(text) => {
-                setFormData({ ...formData, location: text });
+                updateFormData({ ...formData, location: text });
                 if (errors.location) setErrors({ ...errors, location: null });
               }}
               placeholder="Where did you go?"
               placeholderTextColor={theme.textSecondary}
               maxLength={100}
               editable={!gettingLocation}
+              keyboardAppearance={theme.isDarkMode ? "dark" : "light"} // ← Add this
             />
             <Pressable
               style={styles.locationButton}
@@ -430,13 +498,6 @@ export default function AddEntryScreen({ navigation, route }) {
           {errors.location && (
             <Text style={styles.errorText}>{errors.location}</Text>
           )}
-
-          {formData.coordinates && (
-            <Text style={styles.coordinatesText}>
-              📍 {formData.coordinates.latitude.toFixed(4)},{" "}
-              {formData.coordinates.longitude.toFixed(4)}
-            </Text>
-          )}
         </View>
 
         {/* Date Input with Picker */}
@@ -452,17 +513,15 @@ export default function AddEntryScreen({ navigation, route }) {
           </Pressable>
 
           {showDatePicker && (
-            <View style={[styles.datetimePickerCont]}>
-                <DateTimePicker
-                value={parseDate(formData.date)}
-                mode="date"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
-                onChange={onDateChange}
-                maximumDate={new Date()}
-                themeVariant={theme.isDarkMode ? "dark" : "light"}
-                textColor={theme.text}
-                />
-            </View>
+            <DateTimePicker
+              value={parseDate(formData.date)}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onDateChange}
+              maximumDate={new Date()}
+              themeVariant={theme.isDarkMode ? "dark" : "light"}
+              textColor={theme.text}
+            />
           )}
         </View>
 
@@ -473,7 +532,7 @@ export default function AddEntryScreen({ navigation, route }) {
             {[1, 2, 3, 4, 5].map((star) => (
               <Pressable
                 key={star}
-                onPress={() => setFormData({ ...formData, rating: star })}
+                onPress={() => updateFormData({ ...formData, rating: star })}
                 style={[
                   styles.starPressable,
                   star <= formData.rating && styles.starFilled,
@@ -498,12 +557,15 @@ export default function AddEntryScreen({ navigation, route }) {
           <TextInput
             style={[styles.input, styles.textArea]}
             value={formData.notes}
-            onChangeText={(text) => setFormData({ ...formData, notes: text })}
+            onChangeText={(text) =>
+              updateFormData({ ...formData, notes: text })
+            }
             placeholder="Write your memories..."
             placeholderTextColor={theme.textSecondary}
             multiline
             numberOfLines={6}
             textAlignVertical="top"
+            keyboardAppearance={theme.isDarkMode ? "dark" : "light"} // ← Add this
           />
         </View>
 
@@ -530,14 +592,22 @@ export default function AddEntryScreen({ navigation, route }) {
           )}
         </View>
 
-        <View>
+        <View style={{ flexDirection: "column", gap: 8 }}>
+          {/* Cancel Button */}
+          <Pressable
+            style={[styles.cancelButton, { flex: 1 }]}
+            onPress={() => navigation.goBack()}
+            disabled={loading}
+          >
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </Pressable>
+
           {/* Save Button */}
           <Pressable
             style={[
               styles.saveButton,
-              {
-                /*loading && styles.disabledButton*/
-              },
+              loading && styles.disabledButton,
+              { flex: 2 },
             ]}
             onPress={handleSave}
             disabled={loading}
@@ -549,15 +619,6 @@ export default function AddEntryScreen({ navigation, route }) {
                 {entryId ? "Update Entry" : "Save Entry"}
               </Text>
             )}
-          </Pressable>
-
-          {/* Cancel Button */}
-          <Pressable
-            style={styles.cancelButton}
-            onPress={() => navigation.goBack()}
-            disabled={loading}
-          >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
           </Pressable>
         </View>
       </ScrollView>

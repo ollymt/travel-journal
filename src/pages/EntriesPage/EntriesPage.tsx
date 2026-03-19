@@ -16,7 +16,7 @@ const gap = 2;
 const itemSize = (width - gap * (numColumns - 1) - 40) / numColumns; // 40 for horizontal padding
 
 export default function EntriesPage({ navigation }) {
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const styles = getStyles(theme);
 
   const { entries, loading, error } = useTravel();
@@ -37,7 +37,7 @@ export default function EntriesPage({ navigation }) {
             marginBottom: gap,
           },
         ]}
-        onPress={() => navigation.navigate("EntryDetail", { entryId: item.id })}
+        onPress={() => navigation.navigate("EntryDetail", { entryId: item.id, entryDate: item.date })}
       >
         {firstPhoto ? (
           <Image
@@ -72,7 +72,7 @@ export default function EntriesPage({ navigation }) {
   if (loading) {
     return (
       <View style={[styles.centered, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.text }}>Loading your memories...</Text>
+        <Text style={{ color: theme.text }}>Loading your entries...</Text>
       </View>
     );
   }
@@ -89,9 +89,7 @@ export default function EntriesPage({ navigation }) {
     <View style={{ backgroundColor: theme.background, flex: 1 }}>
       {/* Simple header with just the title */}
       <View style={styles.profileHeader}>
-        <Text style={styles.statNumber}>
-          {entries.length}
-        </Text>
+        <Text style={styles.statNumber}>{entries.length}</Text>
         <Text style={styles.statLabel}>
           {entries.length === 1 ? "entry" : "entries"}
         </Text>
@@ -120,10 +118,17 @@ export default function EntriesPage({ navigation }) {
 
       {/* Floating Action Button */}
       <Pressable
-        style={styles.floatingBttn}
+        style={styles.addBttn}
         onPress={() => navigation.navigate("AddEntry")}
       >
-        <Text style={styles.floatingBttnText}>+</Text>
+        <Text style={styles.addBttnText}>＋</Text>
+      </Pressable>
+
+      <Pressable
+        style={styles.themeBttn}
+        onPress={toggleTheme}
+      >
+        <Text style={styles.themeBttnText}>{theme.isDarkMode ? "🌞" : "🌝"}</Text>
       </Pressable>
     </View>
   );
