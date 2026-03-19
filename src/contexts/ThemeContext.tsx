@@ -23,6 +23,7 @@ export const ThemeProvider = ({ children }) => {
     mute: isDarkMode ? "#B1A0C8" : "#CDA9FF",
     muteText: isDarkMode ? "#392E48" : "#392E48",
     error: isDarkMode ? "#F29B9B" : "#D93636",
+    errorText: isDarkMode ? "#111111" : "#EEEEEE",
     isDarkMode,
   };
 

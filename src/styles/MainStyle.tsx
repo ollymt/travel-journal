@@ -200,10 +200,17 @@ export const getStyles = (theme) =>
       alignContent: "flex-start",
       justifyContent: "flex-start",
     },
-    addBttn: {
+
+    floatingBttnsCont: {
       position: "absolute",
+      flex: 1,
+      width: "100%",
+      flexDirection: "row-reverse",
       bottom: 20,
-      right: 20,
+      paddingHorizontal: 20,
+      gap: 10,
+    },
+    addBttn: {
       width: 56,
       height: 56,
       borderRadius: 28,
@@ -222,10 +229,33 @@ export const getStyles = (theme) =>
       fontWeight: "bold",
     },
 
+    recentlyDeletedBttnCont: {
+      flex: 1,
+      alignItems: "center",
+    },
+
+    recentlyDeletedBttn: {
+      width: "75%",
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: theme.background,
+      borderWidth: 2,
+      borderColor: theme.primary,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    recentlyDeletedBttnText: {
+      color: theme.primary,
+      fontSize: 16,
+      fontWeight: "bold",
+    },
+
     themeBttn: {
-      position: "absolute",
-      bottom: 20,
-      left: 20,
       width: 56,
       height: 56,
       borderRadius: 28,
@@ -238,7 +268,6 @@ export const getStyles = (theme) =>
       shadowRadius: 4,
       elevation: 5,
     },
-
     themeBttnText: {
       color: theme.primaryText,
       fontSize: 24,
@@ -247,9 +276,10 @@ export const getStyles = (theme) =>
 
     // Entries Page Grid Styles
     profileHeader: {
-      paddingVertical: 4,
+      paddingBottom: 4,
       paddingHorizontal: 20,
       backgroundColor: theme.background,
+      flexDirection: "row",
     },
     statsContainer: {
       flexDirection: "row",
@@ -454,6 +484,10 @@ export const getStyles = (theme) =>
       backgroundColor: theme.background,
       borderWidth: 2,
       borderColor: theme.error,
+      paddingHorizontal: 16,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 8,
     },
     deleteButtonText: {
       color: theme.error,
@@ -678,7 +712,7 @@ export const getStyles = (theme) =>
 
     saveButtonText: {
       color: theme.primaryText,
-      fontWeight: 500,
+      fontWeight: "bold",
       textAlign: "center",
       fontSize: 16,
     },
@@ -729,5 +763,41 @@ export const getStyles = (theme) =>
 
     entryDetailTagText: {
       color: theme.primaryText,
+    },
+
+    editModeBttn: {
+      backgroundColor: theme.background,
+      borderWidth: 2,
+      borderColor: theme.primary,
+      paddingVertical: 4,
+      paddingHorizontal: 16,
+      borderRadius: 30,
+      width: 80,
+      alignContent: "center",
+      justifyContent: "center",
+    },
+
+    editModeBttnText: {
+      margin: 0,
+      fontWeight: 500,
+      fontSize: 14,
+      textAlign: "center",
+      color: theme.text,
+    },
+
+    statCont: {
+      flex: 1,
+      alignItems: "flex-start",
+    },
+
+    editModeBanner: {
+      backgroundColor: theme.error,
+      paddingVertical: 8,
+    },
+
+    editModeText: {
+      color: theme.errorText,
+      textAlign: "center",
+      fontWeight: 500,
     },
   });

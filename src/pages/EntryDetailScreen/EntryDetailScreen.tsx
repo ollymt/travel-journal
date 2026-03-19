@@ -97,127 +97,114 @@ export default function EntryDetailScreen({ navigation, route }) {
   };
 
   return (
-    <ScrollView
-      style={[
-        styles.entryDetailContainer,
-        { backgroundColor: theme.background },
-      ]}
-    >
-      {/* Main Image */}
-      {entry.photos && entry.photos.length > 0 ? (
-        <View style={styles.imageViewerContainer}>
-          <Image
-            source={{
-              uri:
-                entry.photos[currentImageIndex].uri ||
-                entry.photos[currentImageIndex],
-            }}
-            style={styles.detailMainImage}
-          />
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        style={[
+          styles.entryDetailContainer,
+          { backgroundColor: theme.background },
+        ]}
+      >
+        {/* Main Image */}
+        {entry.photos && entry.photos.length > 0 ? (
+          <View style={styles.imageViewerContainer}>
+            <Image
+              source={{
+                uri:
+                  entry.photos[currentImageIndex].uri ||
+                  entry.photos[currentImageIndex],
+              }}
+              style={styles.detailMainImage}
+            />
 
-          {/* Image navigation arrows (if multiple photos) */}
-          {entry.photos.length > 1 && (
-            <>
-              {currentImageIndex > 0 && (
-                <Pressable
-                  style={[styles.imageNavButton, styles.imageNavLeft]}
-                  onPress={prevImage}
-                >
-                  <Text style={styles.imageNavText}>←</Text>
-                </Pressable>
-              )}
-              {currentImageIndex < entry.photos.length - 1 && (
-                <Pressable
-                  style={[styles.imageNavButton, styles.imageNavRight]}
-                  onPress={nextImage}
-                >
-                  <Text style={styles.imageNavText}>→</Text>
-                </Pressable>
-              )}
-            </>
-          )}
+            {/* Image navigation arrows (if multiple photos) */}
+            {entry.photos.length > 1 && (
+              <>
+                {currentImageIndex > 0 && (
+                  <Pressable
+                    style={[styles.imageNavButton, styles.imageNavLeft]}
+                    onPress={prevImage}
+                  >
+                    <Text style={styles.imageNavText}>←</Text>
+                  </Pressable>
+                )}
+                {currentImageIndex < entry.photos.length - 1 && (
+                  <Pressable
+                    style={[styles.imageNavButton, styles.imageNavRight]}
+                    onPress={nextImage}
+                  >
+                    <Text style={styles.imageNavText}>→</Text>
+                  </Pressable>
+                )}
+              </>
+            )}
 
-          {/* Photo counter */}
-          {entry.photos.length > 1 && (
-            <View style={styles.photoCounter}>
-              <Text style={styles.photoCounterText}>
-                {currentImageIndex + 1} / {entry.photos.length}
-              </Text>
-            </View>
-          )}
-        </View>
-      ) : (
-        <View
-          style={[styles.noImageContainer]}
-        >
-          <Text style={[styles.noImageText]}>
-            No photo available
-          </Text>
-        </View>
-      )}
-
-      {/* Entry Details */}
-      <View style={styles.entryDetailContent}>
-        {entry.tags && entry.tags.length > 0 ? (
-          <>
-            <View style={styles.entryDetailTags}>
-              {entry.tags.map((tag, index) => (
-                <View key={index} style={styles.entryDetailTag}>
-                  <Text style={styles.entryDetailTagText}>#{tag}</Text>
-                </View>
-              ))}
-            </View>
-          </>
-        ) : null}
-        <Text style={styles.entryDetailTitle}>{entry.title}</Text>
-        <Text style={styles.entryDetailLocation}>📍 {entry.location}</Text>
-
-        {entry.rating > 0 && (
-          <View style={styles.entryDetailRating}>
-            <View style={styles.ratingContainer}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Text
-                  key={star}
-                  style={[
-                    styles.star,
-                    styles.starPressable,
-                    star <= entry.rating && styles.starFilled,
-                  ]}
-                >
-                  ★
+            {/* Photo counter */}
+            {entry.photos.length > 1 && (
+              <View style={styles.photoCounter}>
+                <Text style={styles.photoCounterText}>
+                  {currentImageIndex + 1} / {entry.photos.length}
                 </Text>
-              ))}
-            </View>
+              </View>
+            )}
+          </View>
+        ) : (
+          <View style={[styles.noImageContainer]}>
+            <Text style={[styles.noImageText]}>No photo available</Text>
           </View>
         )}
 
-        {entry.notes ? (
-          <>
-            <Text style={styles.entryDetailNotes}>{entry.notes}</Text>
-          </>
-        ) : null}
+        {/* Entry Details */}
+        <View style={styles.entryDetailContent}>
+          {entry.tags && entry.tags.length > 0 ? (
+            <>
+              <View style={styles.entryDetailTags}>
+                {entry.tags.map((tag, index) => (
+                  <View key={index} style={styles.entryDetailTag}>
+                    <Text style={styles.entryDetailTagText}>#{tag}</Text>
+                  </View>
+                ))}
+              </View>
+            </>
+          ) : null}
+          <Text style={styles.entryDetailTitle}>{entry.title}</Text>
+          <Text style={styles.entryDetailLocation}>📍 {entry.location}</Text>
 
-        {/* Action Buttons */}
-        <View style={styles.detailActionButtons}>
-          <Pressable
-            style={[styles.detailButton, styles.deleteButton]}
-            onPress={handleDelete}
-          >
-            <Text style={[styles.detailButtonText, styles.deleteButtonText]}>
-              Delete
-            </Text>
-          </Pressable>
+          {entry.rating > 0 && (
+            <View style={styles.entryDetailRating}>
+              <View style={styles.ratingContainer}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Text
+                    key={star}
+                    style={[
+                      styles.star,
+                      styles.starPressable,
+                      star <= entry.rating && styles.starFilled,
+                    ]}
+                  >
+                    ★
+                  </Text>
+                ))}
+              </View>
+            </View>
+          )}
 
-          <Pressable
-            style={[styles.detailButton, styles.editButton]}
-            onPress={handleEdit}
-          >
-            <Text style={[styles.detailButtonText, styles.editButtonText]}>
-              Edit Entry
-            </Text>
-          </Pressable>
+          {entry.notes ? (
+            <>
+              <Text style={styles.entryDetailNotes}>{entry.notes}</Text>
+            </>
+          ) : null}
         </View>
+        <View style={{height: 60}}/>
+      </ScrollView>
+      <View style={[styles.floatingBttnsCont]}>
+        {/* Floating Action Button */}
+        <Pressable
+          style={styles.addBttn}
+          onPress={handleEdit}
+        >
+          <Text style={styles.addBttnText}>✏️</Text>
+        </Pressable>
       </View>
-    </ScrollView>
+    </View>
   );
 }

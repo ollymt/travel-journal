@@ -27,7 +27,7 @@ import { playSound } from "../../services/SoundService";
 export default function AddEntryScreen({ navigation, route }) {
   const { theme } = useTheme();
   const styles = getStyles(theme);
-  const { addEntry, updateEntry, getEntry } = useTravel();
+  const { addEntry, updateEntry, getEntry, deleteEntry } = useTravel();
 
   const entryId = route.params?.entryId;
   const [loading, setLoading] = useState(false);
@@ -52,6 +52,7 @@ export default function AddEntryScreen({ navigation, route }) {
     photos: [],
     tags: [],
     coordinates: null,
+    isDeleted: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -188,11 +189,18 @@ export default function AddEntryScreen({ navigation, route }) {
     isSaving.current = true;
     setLoading(true);
 
+    // Ensure isDeleted is false when saving/updating
+    const dataToSave = {
+      ...formData,
+      isDeleted: false,
+      deletedAt: null, // Clear deletedAt when saving
+    };
+
     let success;
     if (entryId) {
-      success = await updateEntry(entryId, formData);
+      success = await updateEntry(entryId, dataToSave);
     } else {
-      success = await addEntry(formData);
+      success = await addEntry(dataToSave);
     }
 
     setLoading(false);
@@ -396,6 +404,27 @@ export default function AddEntryScreen({ navigation, route }) {
     });
   };
 
+  const handleDelete = () => {
+      Alert.alert(
+        "Delete Entry",
+        "Are you sure you want to delete this entry? This action cannot be undone.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: async () => {
+              const success = await deleteEntry(entryId);
+              if (success) {
+                navigation.goBack();
+              }
+              navigation.goBack();
+            },
+          },
+        ],
+      );
+    };
+
   return (
     <KeyboardAvoidingView
       style={[styles.addEntryContainer, { backgroundColor: theme.background }]}
@@ -592,33 +621,42 @@ export default function AddEntryScreen({ navigation, route }) {
           )}
         </View>
 
-        <View style={{ flexDirection: "column", gap: 8 }}>
+        <View style={{ flexDirection: "column" }}>
+          <View style={{ flexDirection: "row", gap: 4}}>
+            {entryId && 
+              <Pressable style={styles.deleteButton} onPress={handleDelete}>
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </Pressable>
+            }
+            {/* Save Button */}
+            <Pressable
+              style={[
+                styles.saveButton,
+                loading && styles.disabledButton,
+                { flex: 2 },
+              ]}
+              onPress={handleSave}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={theme.primaryText} />
+              ) : (
+                <Text style={styles.saveButtonText}>
+                  {entryId ? "Save Changes" : "Save Entry"}
+                </Text>
+              )}
+            </Pressable>
+          </View>
+
           {/* Cancel Button */}
           <Pressable
             style={[styles.cancelButton, { flex: 1 }]}
             onPress={() => navigation.goBack()}
             disabled={loading}
           >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
-          </Pressable>
-
-          {/* Save Button */}
-          <Pressable
-            style={[
-              styles.saveButton,
-              loading && styles.disabledButton,
-              { flex: 2 },
-            ]}
-            onPress={handleSave}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color={theme.primaryText} />
-            ) : (
-              <Text style={styles.saveButtonText}>
-                {entryId ? "Update Entry" : "Save Entry"}
-              </Text>
-            )}
+            <Text style={styles.cancelButtonText}>
+              {isDirty ? "Discard" : "Cancel"}
+            </Text>
           </Pressable>
         </View>
       </ScrollView>
