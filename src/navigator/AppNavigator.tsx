@@ -9,37 +9,56 @@ import { useTheme } from "../contexts/ThemeContext";
 import { getStyles } from "../styles/MainStyle";
 import { StatusBar } from "expo-status-bar";
 import EntriesPage from "../pages/EntriesPage/EntriesPage";
+import AddEntryScreen from "../pages/AddEntryScreen/AddEntryScreen";
+import EntryDetailScreen from "../pages/EntryDetailScreen/EntryDetailScreen";
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   const { theme } = useTheme();
   const styles = getStyles(theme);
+
   return (
     <NavigationContainer>
       <StatusBar style={theme.isDarkMode ? "light" : "dark"} />
       <Stack.Navigator
         screenOptions={{
-          // 1. Background color of the header
           headerStyle: {
-            backgroundColor: theme.background, // or theme.card
-            elevation: 0, // Removes shadow on Android
-            shadowOpacity: 0, // Removes shadow on iOS
+            backgroundColor: theme.background,
+            elevation: 0,
+            shadowOpacity: 0,
             borderBottomWidth: 1,
-            borderBottomColor: theme.border,
+            borderBottomColor: theme.border || "#eee",
           },
-          // 2. Color of the Title text
           headerTitleStyle: {
             color: theme.text,
-            fontFamily: "Your-Font-Bold", // If you use custom fonts
+            fontWeight: "bold",
           },
-          // 3. Color of the Back button and icons
           headerTintColor: theme.primary,
-          // 4. Background color of the page behind the header
           headerShadowVisible: false,
+          contentStyle: {
+            backgroundColor: theme.background,
+          },
         }}
       >
-        <Stack.Screen name="Entries" component={EntriesPage} />
+        <Stack.Screen
+          name="Entries"
+          component={EntriesPage}
+          options={{ title: "Travel Journal" }}
+        />
+        <Stack.Screen
+          name="AddEntry"
+          component={AddEntryScreen}
+          options={({ route }) => ({
+            title: route.params?.entryId ? "Edit Entry" : "New Entry",
+            presentation: "modal",
+          })}
+        />
+        <Stack.Screen
+          name="EntryDetail"
+          component={EntryDetailScreen}
+          options={{ title: "Entry Details" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
