@@ -1,20 +1,20 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import EntriesPage from "./src/pages/EntriesPage/EntriesPage";
+import AppNavigator from './src/navigator/AppNavigator';
+import { ThemeContext } from '@react-navigation/native';
+import { ThemeProvider } from './src/contexts/ThemeContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { TravelProvider } from './src/contexts/TravelContext';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <ThemeProvider>
+      <TravelProvider>
+        <SafeAreaProvider style={{ flex: 1 }}>
+          <AppNavigator />
+        </SafeAreaProvider>
+      </TravelProvider>
+    </ThemeProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
