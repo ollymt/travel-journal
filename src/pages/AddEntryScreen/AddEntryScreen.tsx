@@ -434,10 +434,21 @@ export default function AddEntryScreen({ navigation, route }) {
     </View>
   );
 
+  const isAddingTag = useRef(false);
+
+  // Update the addTag function
   const addTag = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    isAddingTag.current = true;
+
     Alert.prompt("Add Tag", "Enter a tag (e.g., beach, food, adventure)", [
-      { text: "Cancel", style: "cancel" },
+      {
+        text: "Cancel",
+        style: "cancel",
+        onPress: () => {
+          isAddingTag.current = false;
+        },
+      },
       {
         text: "Add",
         onPress: (tag) => {
@@ -447,6 +458,7 @@ export default function AddEntryScreen({ navigation, route }) {
               tags: [...formData.tags, tag.trim().toLowerCase()],
             });
           }
+          isAddingTag.current = false;
         },
       },
     ]);
@@ -507,9 +519,41 @@ export default function AddEntryScreen({ navigation, route }) {
 
   const [placeHolderEmojiIndex, setPlaceholderEmojiIndex] = useState(0);
   const placeholderEmojis = [
-    "😀", "🥰", "😭", "😱", "💜", "✈️", "🏖️", "🗿", "⛰️", "📸", "🎆", "🏕️",
-    "🤩", "😎", "🎃", "🫶", "👒", "🚌", "🧳", "🛃", "🛂", "📹", "💈", "🎉",
-    "✨", "⭐️", "💫", "🌈", "🗼", "🌸", "🌞", "🌝", "🍜", "🍝", "🍕"
+    "😀",
+    "🥰",
+    "😭",
+    "😱",
+    "💜",
+    "✈️",
+    "🏖️",
+    "🗿",
+    "⛰️",
+    "📸",
+    "🎆",
+    "🏕️",
+    "🤩",
+    "😎",
+    "🎃",
+    "🫶",
+    "👒",
+    "🚌",
+    "🧳",
+    "🛃",
+    "🛂",
+    "📹",
+    "💈",
+    "🎉",
+    "✨",
+    "⭐️",
+    "💫",
+    "🌈",
+    "🗼",
+    "🌸",
+    "🌞",
+    "🌝",
+    "🍜",
+    "🍝",
+    "🍕",
   ];
 
   // Add useEffect to cycle through emojis
@@ -560,8 +604,9 @@ export default function AddEntryScreen({ navigation, route }) {
         keyboardShouldPersistTaps="handled"
         extraScrollHeight={Platform.OS === "ios" ? 50 : 80}
         enableOnAndroid={true}
-        enableAutomaticScroll={true}
+        enableAutomaticScroll={!isAddingTag.current} // Disable when adding tag
         innerRef={(ref) => (scrollViewRef.current = ref)}
+        resetScrollToCoords={{ x: 0, y: 0 }} // Prevent reset
       >
         {/* Image Gallery or Emoji Preview */}
         {formData.photos.length > 0 ? (
@@ -610,7 +655,7 @@ export default function AddEntryScreen({ navigation, route }) {
               )}
             </Pressable>
             <Text style={styles.emojiHelperText}>
-              Tap to {emoji ? "change" : "add"} an icon
+              Tap to {emoji ? "change the" : "add an"} icon
             </Text>
           </View>
         )}
@@ -670,6 +715,29 @@ export default function AddEntryScreen({ navigation, route }) {
             textAlignVertical="top"
             keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
           />
+        </View>
+
+        {/* Tags */}
+        <View style={styles.inputField}>
+          <View style={styles.tagHeader}>
+            <Text style={styles.inputLabel}>Tags</Text>
+            <Pressable onPress={addTag}>
+              <Text style={styles.addTagText}>+ Add Tag</Text>
+            </Pressable>
+          </View>
+
+          {formData.tags.length > 0 && (
+            <View style={styles.tagsContainer}>
+              {formData.tags.map((tag, index) => (
+                <View key={index} style={styles.tag}>
+                  <Text style={styles.tagText}>#{tag}</Text>
+                  <Pressable onPress={() => removeTag(tag)}>
+                    <Text style={styles.removeTagText}>×</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
 
         {/* Location Input */}
@@ -773,29 +841,6 @@ export default function AddEntryScreen({ navigation, route }) {
               </Pressable>
             ))}
           </View>
-        </View>
-
-        {/* Tags */}
-        <View style={styles.inputField}>
-          <View style={styles.tagHeader}>
-            <Text style={styles.inputLabel}>Tags</Text>
-            <Pressable onPress={addTag}>
-              <Text style={styles.addTagText}>+ Add Tag</Text>
-            </Pressable>
-          </View>
-
-          {formData.tags.length > 0 && (
-            <View style={styles.tagsContainer}>
-              {formData.tags.map((tag, index) => (
-                <View key={index} style={styles.tag}>
-                  <Text style={styles.tagText}>#{tag}</Text>
-                  <Pressable onPress={() => removeTag(tag)}>
-                    <Text style={styles.removeTagText}>×</Text>
-                  </Pressable>
-                </View>
-              ))}
-            </View>
-          )}
         </View>
 
         {/* Action Buttons */}
