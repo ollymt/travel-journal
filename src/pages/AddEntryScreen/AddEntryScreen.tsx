@@ -5,17 +5,16 @@ import {
   Text,
   TextInput,
   Pressable,
-  ScrollView,
   Alert,
   Image,
   FlatList,
-  KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
   Linking,
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { usePreventRemove } from "@react-navigation/native";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../styles/MainStyle";
@@ -524,19 +523,9 @@ export default function AddEntryScreen({ navigation, route }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.addEntryContainer, { backgroundColor: theme.background }]}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 120 : 0}
-    >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          ref={scrollViewRef}
+        <View
           style={styles.addEntryContainer}
-          contentContainerStyle={styles.addEntryForm}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive"
         >
           {/* Image Gallery or Emoji Preview */}
           {formData.photos.length > 0 ? (
@@ -569,7 +558,6 @@ export default function AddEntryScreen({ navigation, route }) {
                     value={emoji}
                     onChangeText={handleEmojiChange}
                     onBlur={handleEmojiBlur}
-                    onFocus={() => handleInputFocus("emoji")}
                     maxLength={2}
                     autoFocus
                     keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
@@ -616,7 +604,6 @@ export default function AddEntryScreen({ navigation, route }) {
                 updateFormData({ ...formData, title: text });
                 if (errors.title) setErrors({ ...errors, title: null });
               }}
-              onFocus={() => handleInputFocus("title")}
               placeholder="Enter a title"
               placeholderTextColor={theme.textSecondary}
               maxLength={100}
@@ -637,7 +624,6 @@ export default function AddEntryScreen({ navigation, route }) {
               onChangeText={(text) =>
                 updateFormData({ ...formData, notes: text })
               }
-              onFocus={() => handleInputFocus("notes")}
               placeholder="Write your memories..."
               placeholderTextColor={theme.textSecondary}
               multiline
@@ -666,7 +652,6 @@ export default function AddEntryScreen({ navigation, route }) {
                   updateFormData({ ...formData, location: text });
                   if (errors.location) setErrors({ ...errors, location: null });
                 }}
-                onFocus={() => handleInputFocus("location")}
                 placeholder="Where did you go?"
                 placeholderTextColor={theme.textSecondary}
                 maxLength={100}
@@ -811,8 +796,7 @@ export default function AddEntryScreen({ navigation, route }) {
               </Text>
             </Pressable>
           </View>
-        </ScrollView>
+        </View>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
   );
 }
