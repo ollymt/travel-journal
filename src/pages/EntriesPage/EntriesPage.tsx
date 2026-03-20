@@ -12,6 +12,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../styles/MainStyle";
 import { useTravel } from "../../contexts/TravelContext";
 import { useState, useRef, useEffect } from "react";
+import * as Haptics from "expo-haptics";
 
 const { width } = Dimensions.get("window");
 const numColumns = 3;
@@ -157,6 +158,7 @@ export default function EntriesPage({ navigation }) {
   };
 
   const handleEdit = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
     setIsEditing(!isEditing);
   };
 
@@ -205,6 +207,7 @@ export default function EntriesPage({ navigation }) {
         ]}
         onPress={() => {
           if (!isEditing) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft)
             navigation.navigate("EntryDetail", {
               entryId: item.id,
               entryDate: item.date,
@@ -223,7 +226,7 @@ export default function EntriesPage({ navigation }) {
         ) : (
           <View style={styles.gridPlaceholder}>
             <Text style={styles.gridPlaceholderText}>
-              {item.title?.charAt(0).toUpperCase() || "📝"}
+              {item.emoji || item.title?.charAt(0).toUpperCase()}
             </Text>
           </View>
         )}
@@ -325,7 +328,10 @@ export default function EntriesPage({ navigation }) {
         {!isEditing && (
           <Pressable
             style={styles.addBttn}
-            onPress={() => navigation.navigate("AddEntry")}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid)
+              navigation.navigate("AddEntry")
+            }}
           >
             <Text style={styles.addBttnText}>＋</Text>
           </Pressable>

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import { useColorScheme } from "react-native";
+import * as Haptics from "expo-haptics";
 
 const ThemeContext = createContext();
 
@@ -8,7 +9,10 @@ export const ThemeProvider = ({ children }) => {
   const systemScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(systemScheme === "dark");
 
-  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode)
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+  };
 
   // Define your color palettes
   const theme = {

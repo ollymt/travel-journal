@@ -11,6 +11,7 @@ import {
 import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../styles/MainStyle";
 import { useTravel } from "../../contexts/TravelContext";
+import * as Haptics from "expo-haptics";
 
 const { width } = Dimensions.get("window");
 
@@ -60,6 +61,7 @@ export default function EntryDetailScreen({ navigation, route }) {
   };
 
   const handleDelete = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)
     Alert.alert(
       "Delete Entry",
       "Are you sure you want to delete this entry? This action cannot be undone.",
@@ -80,6 +82,7 @@ export default function EntryDetailScreen({ navigation, route }) {
   };
 
   const handleEdit = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid)
     navigation.navigate("AddEntry", { entryId: entry.id });
   };
 
@@ -149,7 +152,7 @@ export default function EntryDetailScreen({ navigation, route }) {
           </View>
         ) : (
           <View style={[styles.noImageContainer]}>
-            <Text style={[styles.noImageText]}>No photo available</Text>
+            <Text style={[styles.noImageText]}>{entry.emoji || entry.title?.charAt(0).toUpperCase()}</Text>
           </View>
         )}
 
@@ -157,13 +160,13 @@ export default function EntryDetailScreen({ navigation, route }) {
         <View style={styles.entryDetailContent}>
           {entry.tags && entry.tags.length > 0 ? (
             <>
-              <View style={styles.entryDetailTags}>
+              <ScrollView style={styles.entryDetailTags} horizontal={true} showsHorizontalScrollIndicator={false}>
                 {entry.tags.map((tag, index) => (
                   <View key={index} style={styles.entryDetailTag}>
                     <Text style={styles.entryDetailTagText}>#{tag}</Text>
                   </View>
                 ))}
-              </View>
+              </ScrollView>
             </>
           ) : null}
           <Text style={styles.entryDetailTitle}>{entry.title}</Text>
@@ -194,16 +197,26 @@ export default function EntryDetailScreen({ navigation, route }) {
             </>
           ) : null}
         </View>
-        <View style={{height: 60}}/>
+        <View style={{ height: 100 }} />
       </ScrollView>
       <View style={[styles.floatingBttnsCont]}>
         {/* Floating Action Button */}
-        <Pressable
-          style={styles.addBttn}
-          onPress={handleEdit}
-        >
-          <Text style={styles.addBttnText}>✏️</Text>
-        </Pressable>
+        <View style={{ flex: 1, alignItems: "flex-end" }}>
+          <Pressable
+            style={styles.addBttn}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid)
+              navigation.navigate("AddEntry")
+            }}
+          >
+            <Text style={styles.addBttnText}>＋</Text>
+          </Pressable>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Pressable style={styles.addBttn} onPress={handleEdit}>
+            <Text style={styles.addBttnText}>✏️</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );

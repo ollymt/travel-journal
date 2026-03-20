@@ -192,7 +192,7 @@ export const getStyles = (theme) =>
       color: theme.text,
       borderWidth: 2,
       width: "100%",
-      minHeight: 40,
+      minHeight: 50,
       padding: 10,
       borderRadius: 10,
       marginBottom: 10,
@@ -325,7 +325,7 @@ export const getStyles = (theme) =>
       alignItems: "center",
     },
     gridPlaceholderText: {
-      fontSize: 24,
+      fontSize: 60,
       fontWeight: "bold",
       color: theme.primary,
     },
@@ -453,7 +453,7 @@ export const getStyles = (theme) =>
       backgroundColor: theme.mute,
     },
     noImageText: {
-      fontSize: 16,
+      fontSize: 128,
       color: theme.muteText,
     },
 
@@ -532,6 +532,7 @@ export const getStyles = (theme) =>
       backgroundColor: theme.background,
       paddingVertical: 8,
       paddingHorizontal: 16,
+      height: 50,
       borderRadius: 8,
       flexDirection: "row",
       alignItems: "center",
@@ -626,6 +627,8 @@ export const getStyles = (theme) =>
     // Cancel Button
     cancelButton: {
       backgroundColor: "transparent",
+      height: 50,
+      justifyContent: "center",
       paddingVertical: 10,
       borderRadius: 10,
       alignItems: "center",
@@ -643,7 +646,9 @@ export const getStyles = (theme) =>
     locationButton: {
       backgroundColor: theme.primary,
       justifyContent: "center",
-      minHeight: 40,
+      alignItems: "center",
+      height: 50,
+      width: 50,
       padding: 10,
       borderRadius: 10,
       marginBottom: 10,
@@ -680,6 +685,7 @@ export const getStyles = (theme) =>
 
     ratingContainer: {
       flexDirection: "row",
+      height: 50,
       flex: 1,
       gap: 4,
     },
@@ -695,6 +701,8 @@ export const getStyles = (theme) =>
       borderRadius: 10,
       borderColor: theme.primary,
       borderWidth: 2,
+      justifyContent: "center",
+      alignItems: "center",
     },
 
     starFilled: {
@@ -705,6 +713,8 @@ export const getStyles = (theme) =>
 
     saveButton: {
       backgroundColor: theme.primary,
+      height: 50,
+      justifyContent: "center",
       paddingVertical: 10,
       borderRadius: 10,
       flex: 2,
@@ -750,7 +760,6 @@ export const getStyles = (theme) =>
     },
 
     entryDetailTags: {
-      flexDirection: "row",
       gap: 4,
     },
 
@@ -759,10 +768,11 @@ export const getStyles = (theme) =>
       paddingHorizontal: 8,
       paddingVertical: 2,
       borderRadius: 10,
+      marginRight: 4,
     },
 
     entryDetailTagText: {
-      color: theme.primaryText,
+      color: theme.muteText,
     },
 
     editModeBttn: {
@@ -799,5 +809,23 @@ export const getStyles = (theme) =>
       color: theme.errorText,
       textAlign: "center",
       fontWeight: 500,
+    },
+
+    emojiPreviewContainer: {
+      alignItems: "center",
+      paddingBottom: 20,
+    },
+
+    emojiInput: {
+      fontSize: 100,
+    },
+
+    emojiPreviewText: {
+      fontSize: 100,
+      color: theme.text,
+    },
+
+    emojiHelperText: {
+      color: theme.textSecondary,
     },
   });
