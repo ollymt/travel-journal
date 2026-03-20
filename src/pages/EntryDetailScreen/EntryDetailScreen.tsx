@@ -24,6 +24,19 @@ export default function EntryDetailScreen({ navigation, route }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const entry = getEntry(entryId);
 
+  // Add this state
+  const [editIcon, setEditIcon] = useState("✏️");
+
+  // Add useEffect to cycle the emoji
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setEditIcon((prev) => (prev === "✏️" ? "🗑️" : "✏️"));
+    }, 2000); // Change every 3 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
+
   // Format date for header
   const formatHeaderDate = (dateString) => {
     const date = new Date(dateString);
@@ -61,7 +74,7 @@ export default function EntryDetailScreen({ navigation, route }) {
   };
 
   const handleDelete = () => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     Alert.alert(
       "Delete Entry",
       "Are you sure you want to delete this entry? This action cannot be undone.",
@@ -82,7 +95,7 @@ export default function EntryDetailScreen({ navigation, route }) {
   };
 
   const handleEdit = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid)
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
     navigation.navigate("AddEntry", { entryId: entry.id });
   };
 
@@ -152,7 +165,9 @@ export default function EntryDetailScreen({ navigation, route }) {
           </View>
         ) : (
           <View style={[styles.noImageContainer]}>
-            <Text style={[styles.noImageText]}>{entry.emoji || entry.title?.charAt(0).toUpperCase()}</Text>
+            <Text style={[styles.noImageText]}>
+              {entry.emoji || entry.title?.charAt(0).toUpperCase()}
+            </Text>
           </View>
         )}
 
@@ -160,7 +175,11 @@ export default function EntryDetailScreen({ navigation, route }) {
         <View style={styles.entryDetailContent}>
           {entry.tags && entry.tags.length > 0 ? (
             <>
-              <ScrollView style={styles.entryDetailTags} horizontal={true} showsHorizontalScrollIndicator={false}>
+              <ScrollView
+                style={styles.entryDetailTags}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+              >
                 {entry.tags.map((tag, index) => (
                   <View key={index} style={styles.entryDetailTag}>
                     <Text style={styles.entryDetailTagText}>#{tag}</Text>
@@ -205,16 +224,16 @@ export default function EntryDetailScreen({ navigation, route }) {
           <Pressable
             style={styles.addBttn}
             onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid)
-              navigation.navigate("AddEntry")
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+              navigation.navigate("AddEntry");
             }}
           >
             <Text style={styles.addBttnText}>＋</Text>
           </Pressable>
         </View>
         <View style={{ flex: 1 }}>
-          <Pressable style={styles.addBttn} onPress={handleEdit}>
-            <Text style={styles.addBttnText}>✏️</Text>
+          <Pressable style={styles.floatingEditBttn} onPress={handleEdit}>
+            <Text style={styles.floatingEditBttnText}>{editIcon}</Text>
           </Pressable>
         </View>
       </View>

@@ -475,6 +475,7 @@ export default function AddEntryScreen({ navigation, route }) {
             if (success) {
               navigation.goBack();
             }
+            navigation.goBack();
           },
         },
       ],
@@ -504,9 +505,33 @@ export default function AddEntryScreen({ navigation, route }) {
     // If emoji is empty, it will default to monogram in grid view
   };
 
+  const [placeHolderEmojiIndex, setPlaceholderEmojiIndex] = useState(0);
+  const placeholderEmojis = [
+    "😀", "🥰", "😭", "😱", "💜", "✈️", "🏖️", "🗿", "⛰️", "📸", "🎆", "🏕️",
+    "🤩", "😎", "🎃", "🫶", "👒", "🚌", "🧳", "🛃", "🛂", "📹", "💈", "🎉",
+    "✨", "⭐️", "💫", "🌈", "🗼", "🌸", "🌞", "🌝", "🍜", "🍝", "🍕"
+  ];
+
+  // Add useEffect to cycle through emojis
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderEmojiIndex((prevIndex) => {
+        let newIndex;
+        // Keep generating random indices until we get one different from current
+        do {
+          newIndex = Math.floor(Math.random() * placeholderEmojis.length);
+        } while (newIndex === prevIndex && placeholderEmojis.length > 1);
+
+        return newIndex;
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [placeholderEmojis.length]); // Add dependency
+
   // Get monogram from title
   const getMonogram = () => {
-    return formData.title?.charAt(0).toUpperCase() || "🫥";
+    return placeholderEmojis[placeHolderEmojiIndex];
   };
 
   const handleInputFocus = (inputName) => {
@@ -572,6 +597,11 @@ export default function AddEntryScreen({ navigation, route }) {
                   maxLength={2}
                   autoFocus
                   keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
+                  keyboardType="default"
+                  textContentType="none"
+                  autoCorrect={false}
+                  autoComplete="off"
+                  importantForAutofill="no"
                 />
               ) : (
                 <Text style={styles.emojiPreviewText}>
@@ -588,7 +618,7 @@ export default function AddEntryScreen({ navigation, route }) {
         {/* Image Picker Buttons */}
         <View style={styles.imagePickerRow}>
           <Pressable
-            style={[styles.imagePickerButton, { flex: 1, marginRight: 5 }]}
+            style={[styles.imagePickerButton, { flex: 1 }]}
             onPress={pickImage}
           >
             <Text style={styles.imagePickerIcon}>🖼️</Text>
@@ -596,7 +626,7 @@ export default function AddEntryScreen({ navigation, route }) {
           </Pressable>
 
           <Pressable
-            style={[styles.imagePickerButton, { flex: 1, marginLeft: 5 }]}
+            style={[styles.imagePickerButton, { flex: 1 }]}
             onPress={takePhoto}
           >
             <Text style={styles.imagePickerIcon}>📸</Text>
@@ -648,7 +678,7 @@ export default function AddEntryScreen({ navigation, route }) {
             <Text style={styles.inputLabel}>Location *</Text>
           </View>
 
-          <View style={{ flexDirection: "row", gap: 4 }}>
+          <View style={{ flexDirection: "row", gap: 8 }}>
             <TextInput
               ref={(ref) => (inputRefs.location = ref)}
               style={[
@@ -770,7 +800,7 @@ export default function AddEntryScreen({ navigation, route }) {
 
         {/* Action Buttons */}
         <View style={{ flexDirection: "column" }}>
-          <View style={{ flexDirection: "row", gap: 4 }}>
+          <View style={{ flexDirection: "row", gap: 8 }}>
             {entryId && (
               <Pressable style={styles.deleteButton} onPress={handleDelete}>
                 <Text style={styles.deleteButtonText}>Delete</Text>

@@ -229,6 +229,28 @@ export const getStyles = (theme) =>
       fontWeight: "bold",
     },
 
+    floatingEditBttn: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: theme.primaryText,
+      borderWidth: 2,
+      borderColor: theme.primary,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+
+    floatingEditBttnText: {
+      color: theme.primary,
+      fontSize: 24,
+      fontWeight: 500,
+    },
+
     recentlyDeletedBttnCont: {
       flex: 1,
       alignItems: "center",
@@ -526,6 +548,7 @@ export const getStyles = (theme) =>
     // Image Picker Styles
     imagePickerRow: {
       flexDirection: "row",
+      gap: 8,
       marginBottom: 20,
     },
     imagePickerButton: {
@@ -687,7 +710,7 @@ export const getStyles = (theme) =>
       flexDirection: "row",
       height: 50,
       flex: 1,
-      gap: 4,
+      gap: 8,
     },
 
     star: {
