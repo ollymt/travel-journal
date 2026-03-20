@@ -9,6 +9,7 @@ import {
   Image,
   FlatList,
   Platform,
+  ScrollView,
   ActivityIndicator,
   Linking,
   TouchableWithoutFeedback,
@@ -523,280 +524,288 @@ export default function AddEntryScreen({ navigation, route }) {
   };
 
   return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View
-          style={styles.addEntryContainer}
-        >
-          {/* Image Gallery or Emoji Preview */}
-          {formData.photos.length > 0 ? (
-            <>
-              <Text style={styles.inputLabel}>
-                Photos ({formData.photos.length})
-              </Text>
-              <View style={styles.imageGallery}>
-                <FlatList
-                  data={formData.photos}
-                  renderItem={renderImage}
-                  keyExtractor={(item) => item.id}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.imageList}
-                />
-              </View>
-            </>
-          ) : (
-            <View style={styles.emojiPreviewContainer}>
-              {/*<Text style={styles.inputLabel}>Entry Icon</Text>*/}
-              <Pressable onPress={handleEmojiPress} style={styles.emojiPreview}>
-                {showEmojiInput ? (
-                  <TextInput
-                    ref={(ref) => {
-                      emojiInputRef.current = ref;
-                      inputRefs.emoji = ref;
-                    }}
-                    style={[styles.emojiInput]}
-                    value={emoji}
-                    onChangeText={handleEmojiChange}
-                    onBlur={handleEmojiBlur}
-                    maxLength={2}
-                    autoFocus
-                    keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
-                  />
-                ) : (
-                  <Text style={styles.emojiPreviewText}>
-                    {emoji || getMonogram()}
-                  </Text>
-                )}
-              </Pressable>
-              <Text style={styles.emojiHelperText}>
-                Tap to {emoji ? "change" : "add"} an icon
-              </Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAwareScrollView
+        style={[
+          styles.addEntryContainer,
+          { backgroundColor: theme.background },
+        ]}
+        contentContainerStyle={styles.addEntryForm}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        extraScrollHeight={Platform.OS === "ios" ? 50 : 80}
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        innerRef={(ref) => (scrollViewRef.current = ref)}
+      >
+        {/* Image Gallery or Emoji Preview */}
+        {formData.photos.length > 0 ? (
+          <>
+            <Text style={styles.inputLabel}>
+              Photos ({formData.photos.length})
+            </Text>
+            <View style={styles.imageGallery}>
+              <FlatList
+                data={formData.photos}
+                renderItem={renderImage}
+                keyExtractor={(item) => item.id}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.imageList}
+              />
             </View>
-          )}
-
-          {/* Image Picker Buttons */}
-          <View style={styles.imagePickerRow}>
-            <Pressable
-              style={[styles.imagePickerButton, { flex: 1, marginRight: 5 }]}
-              onPress={pickImage}
-            >
-              <Text style={styles.imagePickerIcon}>🖼️</Text>
-              <Text style={styles.imagePickerText}>Camera Roll</Text>
+          </>
+        ) : (
+          <View style={styles.emojiPreviewContainer}>
+            {/*<Text style={styles.inputLabel}>Entry Icon</Text>*/}
+            <Pressable onPress={handleEmojiPress} style={styles.emojiPreview}>
+              {showEmojiInput ? (
+                <TextInput
+                  ref={(ref) => {
+                    emojiInputRef.current = ref;
+                    inputRefs.emoji = ref;
+                  }}
+                  style={[styles.emojiInput]}
+                  value={emoji}
+                  onChangeText={handleEmojiChange}
+                  onBlur={handleEmojiBlur}
+                  maxLength={2}
+                  autoFocus
+                  keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
+                />
+              ) : (
+                <Text style={styles.emojiPreviewText}>
+                  {emoji || getMonogram()}
+                </Text>
+              )}
             </Pressable>
+            <Text style={styles.emojiHelperText}>
+              Tap to {emoji ? "change" : "add"} an icon
+            </Text>
+          </View>
+        )}
 
-            <Pressable
-              style={[styles.imagePickerButton, { flex: 1, marginLeft: 5 }]}
-              onPress={takePhoto}
-            >
-              <Text style={styles.imagePickerIcon}>📸</Text>
-              <Text style={styles.imagePickerText}>Take Photo</Text>
-            </Pressable>
+        {/* Image Picker Buttons */}
+        <View style={styles.imagePickerRow}>
+          <Pressable
+            style={[styles.imagePickerButton, { flex: 1, marginRight: 5 }]}
+            onPress={pickImage}
+          >
+            <Text style={styles.imagePickerIcon}>🖼️</Text>
+            <Text style={styles.imagePickerText}>Camera Roll</Text>
+          </Pressable>
+
+          <Pressable
+            style={[styles.imagePickerButton, { flex: 1, marginLeft: 5 }]}
+            onPress={takePhoto}
+          >
+            <Text style={styles.imagePickerIcon}>📸</Text>
+            <Text style={styles.imagePickerText}>Take Photo</Text>
+          </Pressable>
+        </View>
+
+        {/* Title Input */}
+        <View style={styles.inputField}>
+          <Text style={styles.inputLabel}>Title *</Text>
+          <TextInput
+            ref={(ref) => (inputRefs.title = ref)}
+            style={[styles.input, errors.title && styles.inputError]}
+            value={formData.title}
+            onChangeText={(text) => {
+              updateFormData({ ...formData, title: text });
+              if (errors.title) setErrors({ ...errors, title: null });
+            }}
+            placeholder="Enter a title"
+            placeholderTextColor={theme.textSecondary}
+            maxLength={100}
+            keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
+          />
+          {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
+        </View>
+
+        {/* Notes Input */}
+        <View style={styles.inputField}>
+          <Text style={styles.inputLabel}>Body</Text>
+          <TextInput
+            ref={(ref) => (inputRefs.notes = ref)}
+            style={[styles.input, styles.textArea]}
+            value={formData.notes}
+            onChangeText={(text) =>
+              updateFormData({ ...formData, notes: text })
+            }
+            placeholder="Write your memories..."
+            placeholderTextColor={theme.textSecondary}
+            multiline
+            numberOfLines={6}
+            textAlignVertical="top"
+            keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
+          />
+        </View>
+
+        {/* Location Input */}
+        <View style={styles.inputField}>
+          <View style={styles.locationHeader}>
+            <Text style={styles.inputLabel}>Location *</Text>
           </View>
 
-          {/* Title Input */}
-          <View style={styles.inputField}>
-            <Text style={styles.inputLabel}>Title *</Text>
+          <View style={{ flexDirection: "row", gap: 4 }}>
             <TextInput
-              ref={(ref) => (inputRefs.title = ref)}
-              style={[styles.input, errors.title && styles.inputError]}
-              value={formData.title}
+              ref={(ref) => (inputRefs.location = ref)}
+              style={[
+                styles.input,
+                styles.locationInput,
+                errors.location && styles.inputError,
+              ]}
+              value={formData.location}
               onChangeText={(text) => {
-                updateFormData({ ...formData, title: text });
-                if (errors.title) setErrors({ ...errors, title: null });
+                updateFormData({ ...formData, location: text });
+                if (errors.location) setErrors({ ...errors, location: null });
               }}
-              placeholder="Enter a title"
+              placeholder="Where did you go?"
               placeholderTextColor={theme.textSecondary}
               maxLength={100}
+              editable={!gettingLocation}
               keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
             />
-            {errors.title && (
-              <Text style={styles.errorText}>{errors.title}</Text>
-            )}
-          </View>
-
-          {/* Notes Input */}
-          <View style={styles.inputField}>
-            <Text style={styles.inputLabel}>Body</Text>
-            <TextInput
-              ref={(ref) => (inputRefs.notes = ref)}
-              style={[styles.input, styles.textArea]}
-              value={formData.notes}
-              onChangeText={(text) =>
-                updateFormData({ ...formData, notes: text })
-              }
-              placeholder="Write your memories..."
-              placeholderTextColor={theme.textSecondary}
-              multiline
-              numberOfLines={6}
-              textAlignVertical="top"
-              keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
-            />
-          </View>
-
-          {/* Location Input */}
-          <View style={styles.inputField}>
-            <View style={styles.locationHeader}>
-              <Text style={styles.inputLabel}>Location *</Text>
-            </View>
-
-            <View style={{ flexDirection: "row", gap: 4 }}>
-              <TextInput
-                ref={(ref) => (inputRefs.location = ref)}
-                style={[
-                  styles.input,
-                  styles.locationInput,
-                  errors.location && styles.inputError,
-                ]}
-                value={formData.location}
-                onChangeText={(text) => {
-                  updateFormData({ ...formData, location: text });
-                  if (errors.location) setErrors({ ...errors, location: null });
-                }}
-                placeholder="Where did you go?"
-                placeholderTextColor={theme.textSecondary}
-                maxLength={100}
-                editable={!gettingLocation}
-                keyboardAppearance={theme.isDarkMode ? "dark" : "light"}
-              />
-              <Pressable
-                style={styles.locationButton}
-                onPress={getCurrentLocation}
-                disabled={gettingLocation}
-              >
-                {gettingLocation ? (
-                  <ActivityIndicator
-                    size="small"
-                    animating={true}
-                    color={theme.primaryText}
-                  />
-                ) : (
-                  <Text style={styles.locationButtonText}>📍</Text>
-                )}
-              </Pressable>
-            </View>
-            {errors.location && (
-              <Text style={styles.errorText}>{errors.location}</Text>
-            )}
-          </View>
-
-          {/* Date Input */}
-          <View style={styles.inputField}>
-            <Text style={styles.inputLabel}>Date</Text>
             <Pressable
-              style={styles.datePickerButton}
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setShowDatePicker(true);
-              }}
+              style={styles.locationButton}
+              onPress={getCurrentLocation}
+              disabled={gettingLocation}
             >
-              <Text style={styles.datePickerButtonText}>
-                {formatDisplayDate(formData.date)}
-              </Text>
+              {gettingLocation ? (
+                <ActivityIndicator
+                  size="small"
+                  animating={true}
+                  color={theme.primaryText}
+                />
+              ) : (
+                <Text style={styles.locationButtonText}>📍</Text>
+              )}
             </Pressable>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={parseDate(formData.date)}
-                mode="date"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
-                onChange={onDateChange}
-                maximumDate={new Date()}
-                themeVariant={theme.isDarkMode ? "dark" : "light"}
-                textColor={theme.text}
-              />
-            )}
           </View>
+          {errors.location && (
+            <Text style={styles.errorText}>{errors.location}</Text>
+          )}
+        </View>
 
-          {/* Rating */}
-          <View style={styles.inputField}>
-            <Text style={styles.inputLabel}>Rating</Text>
-            <View style={styles.ratingContainer}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Pressable
-                  key={star}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    updateFormData({ ...formData, rating: star });
-                  }}
+        {/* Date Input */}
+        <View style={styles.inputField}>
+          <Text style={styles.inputLabel}>Date</Text>
+          <Pressable
+            style={styles.datePickerButton}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowDatePicker(true);
+            }}
+          >
+            <Text style={styles.datePickerButtonText}>
+              {formatDisplayDate(formData.date)}
+            </Text>
+          </Pressable>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={parseDate(formData.date)}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onDateChange}
+              maximumDate={new Date()}
+              themeVariant={theme.isDarkMode ? "dark" : "light"}
+              textColor={theme.text}
+            />
+          )}
+        </View>
+
+        {/* Rating */}
+        <View style={styles.inputField}>
+          <Text style={styles.inputLabel}>Rating</Text>
+          <View style={styles.ratingContainer}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Pressable
+                key={star}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  updateFormData({ ...formData, rating: star });
+                }}
+                style={[
+                  styles.starPressable,
+                  star <= formData.rating && styles.starFilled,
+                ]}
+              >
+                <Text
                   style={[
-                    styles.starPressable,
+                    styles.star,
                     star <= formData.rating && styles.starFilled,
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.star,
-                      star <= formData.rating && styles.starFilled,
-                    ]}
-                  >
-                    ★
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
-          {/* Tags */}
-          <View style={styles.inputField}>
-            <View style={styles.tagHeader}>
-              <Text style={styles.inputLabel}>Tags</Text>
-              <Pressable onPress={addTag}>
-                <Text style={styles.addTagText}>+ Add Tag</Text>
+                  ★
+                </Text>
               </Pressable>
-            </View>
-
-            {formData.tags.length > 0 && (
-              <View style={styles.tagsContainer}>
-                {formData.tags.map((tag, index) => (
-                  <View key={index} style={styles.tag}>
-                    <Text style={styles.tagText}>#{tag}</Text>
-                    <Pressable onPress={() => removeTag(tag)}>
-                      <Text style={styles.removeTagText}>×</Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-
-          {/* Action Buttons */}
-          <View style={{ flexDirection: "column" }}>
-            <View style={{ flexDirection: "row", gap: 4 }}>
-              {entryId && (
-                <Pressable style={styles.deleteButton} onPress={handleDelete}>
-                  <Text style={styles.deleteButtonText}>Delete</Text>
-                </Pressable>
-              )}
-              <Pressable
-                style={[
-                  styles.saveButton,
-                  loading && styles.disabledButton,
-                  { flex: 2 },
-                ]}
-                onPress={handleSave}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color={theme.primaryText} />
-                ) : (
-                  <Text style={styles.saveButtonText}>
-                    {entryId ? "Save Changes" : "Save Entry"}
-                  </Text>
-                )}
-              </Pressable>
-            </View>
-
-            <Pressable
-              style={[styles.cancelButton, { flex: 1 }]}
-              onPress={() => navigation.goBack()}
-              disabled={loading}
-            >
-              <Text style={styles.cancelButtonText}>
-                {isDirty ? "Discard" : "Cancel"}
-              </Text>
-            </Pressable>
+            ))}
           </View>
         </View>
-      </TouchableWithoutFeedback>
+
+        {/* Tags */}
+        <View style={styles.inputField}>
+          <View style={styles.tagHeader}>
+            <Text style={styles.inputLabel}>Tags</Text>
+            <Pressable onPress={addTag}>
+              <Text style={styles.addTagText}>+ Add Tag</Text>
+            </Pressable>
+          </View>
+
+          {formData.tags.length > 0 && (
+            <View style={styles.tagsContainer}>
+              {formData.tags.map((tag, index) => (
+                <View key={index} style={styles.tag}>
+                  <Text style={styles.tagText}>#{tag}</Text>
+                  <Pressable onPress={() => removeTag(tag)}>
+                    <Text style={styles.removeTagText}>×</Text>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Action Buttons */}
+        <View style={{ flexDirection: "column" }}>
+          <View style={{ flexDirection: "row", gap: 4 }}>
+            {entryId && (
+              <Pressable style={styles.deleteButton} onPress={handleDelete}>
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </Pressable>
+            )}
+            <Pressable
+              style={[
+                styles.saveButton,
+                loading && styles.disabledButton,
+                { flex: 2 },
+              ]}
+              onPress={handleSave}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={theme.primaryText} />
+              ) : (
+                <Text style={styles.saveButtonText}>
+                  {entryId ? "Save Changes" : "Save Entry"}
+                </Text>
+              )}
+            </Pressable>
+          </View>
+
+          <Pressable
+            style={[styles.cancelButton, { flex: 1 }]}
+            onPress={() => navigation.goBack()}
+            disabled={loading}
+          >
+            <Text style={styles.cancelButtonText}>
+              {isDirty ? "Discard" : "Cancel"}
+            </Text>
+          </Pressable>
+        </View>
+      </KeyboardAwareScrollView>
+    </TouchableWithoutFeedback>
   );
 }

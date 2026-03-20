@@ -173,6 +173,7 @@ export default function EntriesPage({ navigation }) {
   };
 
   const handleDelete = (item) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning)
     Alert.alert(
       "Delete Entry",
       `Are you sure you want to delete the entry "${item.title}" from ${formatHeaderDate(item.date)}? This action cannot be undone.`,
